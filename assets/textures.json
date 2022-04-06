@@ -221,6 +221,15 @@
     }
   },
   {
+    "id": "big_bucket_hat",
+    "path": "textures/items/hats/big bucket hat.png",
+    "type": "spritesheet",
+    "sprite_size": {
+      "x": 44,
+      "y": 29
+    }
+  },
+  {
     "id": "bonnet_hat",
     "path": "textures/items/hats/bonnet hat.png",
     "type": "spritesheet",
