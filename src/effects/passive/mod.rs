@@ -64,6 +64,7 @@ pub enum PassiveEffectKind {
     MovementMultiplier(MovementMultiplierEffectOptions),
 }
 
+
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct ShieldEffectOptions {

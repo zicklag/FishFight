@@ -108,6 +108,10 @@ pub fn update_player_inventory(world: &mut World) {
 
                         if let Some(hat_entity) = inventory.hat.take() {
                             to_drop.push(hat_entity);
+
+                            player
+                                .passive_effects
+                                .retain(|x| x.item != Some(hat_entity));
                         }
 
                         inventory.hat = Some(item_entity);

@@ -1,0 +1,39 @@
+{
+  "id": "big_bucket_hat",
+  "name": "Big Bucket Hat",
+  "type": "item",
+  "hat": true,
+  "uses": 1,
+  "drop_behavior": "destroy",
+  "collider_size": {
+    "x": 44,
+    "y": 29
+  },
+  "mount_offset": {
+    "x": -2,
+    "y": 20
+  },
+  "effects": [
+    {
+      "name": "Bucket Blind",
+      "type": "movement_multiplier",
+      "x": -1.0
+    },
+    {
+      "name": "Bucket Shield",
+      "type": "shield"
+    }
+  ],
+  "sprite": {
+    "texture": "big_bucket_hat",
+    "autoplay_id": "idle",
+    "animations": [
+      {
+        "id": "idle",
+        "row": 0,
+        "frames": 1,
+        "fps": 1
+      }
+    ]
+  }
+}
