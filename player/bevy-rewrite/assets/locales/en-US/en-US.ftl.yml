@@ -1,0 +1,11 @@
+locale: en-US
+resources:
+  - branding.ftl
+  - menu.ftl
+  - debug-tools.ftl
+
+  - settings.ftl
+  - editor.ftl
+  - player-select.ftl
+
+  - controls.ftl
