@@ -1,6 +1,0 @@
-name: Player Spawner
-category: Gampelay
-script: ./player_spawner.ts
-editor_size: [16, 32]
-preload_assets:
-  - ./pescy.atlas.yaml
