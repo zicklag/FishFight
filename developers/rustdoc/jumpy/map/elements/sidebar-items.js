@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":[["crate_item","The crate item."],["decoration",""],["grenade",""],["mine","The crate item."],["player_spawner",""],["sproinger",""],["stomp_boots","The crate item."],["sword",""]],"struct":[["MapElementsPlugin",""]]};
