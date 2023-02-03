@@ -13,13 +13,17 @@ builtin: !KickBomb
   explosion_frames: 12
   explosion_fps: 8
   explosion_sound: ./explosion.ogg
+  explosion_volume: 0.1
 
+  fuse_sound_volume: 0.1
   fuse_sound: ./fuse.ogg
 
   body_size: [30, 30]
-  grab_offset: [14, -2]
+  grab_offset: [5, -2]
+  fin_anim: grab_2
   body_offset: [0, 2]
   can_rotate: true
-  bouncyness: 0.6
+  bounciness: 0.6
   angular_velocity: 0.1
-  arm_delay: 0.02
+  # arm_delay: 0.02
+  arm_delay: 0.5
