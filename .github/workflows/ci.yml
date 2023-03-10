@@ -94,6 +94,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: ♻️ Cache Cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+            web-target/
+          key: ci-deny-${{ matrix.config.checks }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ci-deny-${{ matrix.config.checks }}-
       - uses: EmbarkStudios/cargo-deny-action@v1
         with:
           command: check ${{ matrix.checks }}
