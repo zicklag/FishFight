@@ -11,13 +11,17 @@ sounds:
   drop_volume: 0.05
 
 stats:
-  air_move_speed: 6
+  air_speed: 6
+  accel_air_speed: 1
   walk_speed: 6
-  jump_speed: 14
+  accel_walk_speed: 1
+  jump_speed: 11
   slow_fall_speed: 1.5
+  slowdown: 0.8
 
 body_size: [32, 48]
-gravity: 1
+slide_body_size: [48, 32]
+gravity: 0.6
 
 layers:
   body:
@@ -89,7 +93,13 @@ layers:
             offset: [0, -4]
         fps: *fps
         repeat: false
-      death_1:
+      slide:
+        fps: *fps
+        frames:
+          - idx: 58
+            offset: [1, -8]
+        repeat: false
+      death_spine:
         frames:
           - idx: 70
           - idx: 71
@@ -98,6 +108,17 @@ layers:
           - idx: 74
           - idx: 75
           - idx: 76
+        fps: *fps
+        repeat: false
+      death_belly:
+        frames:
+          - idx: 84
+          - idx: 85
+          - idx: 86
+          - idx: 87
+          - idx: 88
+          - idx: 89
+          - idx: 90
         fps: *fps
         repeat: false
   fin:
@@ -141,7 +162,15 @@ layers:
         fps: *fps
         frames:
           - 20
-      death_1:
+      slide:
+        fps: *fps
+        frames:
+          - 25
+      death_spine:
+        fps: *fps
+        frames:
+          - 3 # Intentionally an invisible frame
+      death_belly:
         fps: *fps
         frames:
           - 3 # Intentionally an invisible frame
@@ -191,7 +220,15 @@ layers:
         fps: *fps
         frames:
           - 4
-      death_1:
+      slide:
+        fps: *fps
+        frames:
+          - 8 # Intentionally an invisible frame
+      death_spine:
+        fps: *fps
+        frames:
+          - 8 # Intentionally an invisible frame
+      death_belly:
         fps: *fps
         frames:
           - 8 # Intentionally an invisible frame
