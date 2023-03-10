@@ -3,6 +3,7 @@
 # top-most EditorConfig file
 root = true
 
+# Default file config
 [*]
 indent_style = space
 indent_size = 4
