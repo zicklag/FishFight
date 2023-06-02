@@ -3,8 +3,8 @@ config:
 
 camera:
   default_height: 448
-  border_right: 75
-  border_left: 75
+  border_right: 300
+  border_left: 300
   border_top: 50
   border_bottom: 200
   player_camera_box_size: [100, 250]
@@ -39,6 +39,7 @@ stable_maps:
   - /map/levels/level_11.map.yaml
   - /map/levels/level_12.map.yaml
   - /map/levels/level_13.map.yaml
+  - /map/levels/level_14.map.yaml
 
 map_tilesets:
   - /map/resources/default_tileset.atlas.yaml
@@ -57,6 +58,8 @@ map_elements:
   - /elements/environment/snail/snail.element.yaml
   - /elements/environment/player_spawner/player_spawner.element.yaml
   - /elements/environment/sproinger/sproinger.element.yaml
+  - /elements/environment/slippery/slippery.element.yaml
+  - /elements/environment/slippery_seaweed/slippery_seaweed.element.yaml
   - /elements/item/crate/crate.element.yaml
   - /elements/item/grenade/grenade.element.yaml
   - /elements/item/kick_bomb/kick_bomb.element.yaml
