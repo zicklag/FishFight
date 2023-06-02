@@ -372,19 +372,12 @@
 <a href="#371" id="371">371</a>
 <a href="#372" id="372">372</a>
 <a href="#373" id="373">373</a>
-<a href="#374" id="374">374</a>
-<a href="#375" id="375">375</a>
-<a href="#376" id="376">376</a>
-<a href="#377" id="377">377</a>
-<a href="#378" id="378">378</a>
-<a href="#379" id="379">379</a>
-<a href="#380" id="380">380</a>
-<a href="#381" id="381">381</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::marker::PhantomData;
 
 <span class="kw">use </span>bevy::{
     app::AppExit,
     ecs::system::{SystemParam, SystemState},
+    window::PrimaryWindow,
 };
 <span class="kw">use </span>bevy_egui::<span class="kw-2">*</span>;
 <span class="kw">use </span>bevy_fluent::Localization;
@@ -394,10 +387,10 @@
     metadata::{GameMeta, Settings},
     platform::Storage,
     prelude::<span class="kw-2">*</span>,
-    ui::input::MenuAction,
+    ui::ui_input::MenuAction,
 };
 
-<span class="kw">use </span><span class="self">self</span>::settings::{ModifiedSettings, SettingsTab};
+<span class="kw">use </span><span class="self">self</span>::settings::ModifiedSettings;
 
 <span class="kw">use super</span>::{
     widget,
@@ -408,10 +401,10 @@
     DisableMenuInput, WidgetAdjacencies, WidgetId, WidgetSystem,
 };
 
+<span class="kw">pub mod </span>credits;
 <span class="kw">pub mod </span>map_select;
-<span class="comment">// #[cfg(not(target_arch = &quot;wasm32&quot;))]
-// pub mod matchmaking;
-</span><span class="kw">pub mod </span>credits;
+<span class="attr">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
+</span><span class="kw">pub mod </span>network_game;
 <span class="kw">pub mod </span>player_select;
 <span class="kw">pub mod </span>settings;
 
@@ -424,13 +417,11 @@
             .init_resource::&lt;settings::SettingsTab&gt;()
             .init_resource::&lt;settings::ModifiedSettings&gt;()
             .init_resource::&lt;player_select::PlayerSelectState&gt;()
-            .add_system(
-                main_menu_system
-                    .run_in_state(EngineState::MainMenu)
-                    .at_end(),
-            )
-            .add_enter_system(EngineState::MainMenu, setup_main_menu)
-            .add_exit_system(EngineState::MainMenu, clean_up_main_menu);
+            .add_systems((
+                main_menu_system.run_if(in_state(EngineState::MainMenu)),
+                setup_main_menu.in_schedule(OnEnter(EngineState::MainMenu)),
+                clean_up_main_menu.in_schedule(OnExit(EngineState::MainMenu)),
+            ));
     }
 }
 
@@ -448,7 +439,7 @@
     session_manager.stop();
 
     <span class="comment">// Make sure the game editor is hidden
-    </span>commands.insert_resource(NextState(GameEditorState::Hidden));
+    </span>commands.insert_resource(NextState(<span class="prelude-val">Some</span>(GameEditorState::Hidden)));
 
     <span class="comment">// Spawn menu background
     </span><span class="kw">let </span>bg_handle = game.main_menu.background_image.image.inner.clone_weak();
@@ -524,8 +515,8 @@
         </span>is_waiting: bool,
     },
     Credits,
-    <span class="comment">// Matchmaking,
-</span>}
+    NetworkGame,
+}
 
 <span class="kw">impl </span>Default <span class="kw">for </span>MenuPage {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
@@ -533,23 +524,18 @@
     }
 }
 
-<span class="kw">impl </span>SettingsTab {
-    <span class="kw">const </span>TABS: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[(<span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str)] = <span class="kw-2">&amp;</span>[
-        (<span class="self">Self</span>::Controls, <span class="string">&quot;controls&quot;</span>),
-        (<span class="self">Self</span>::Networking, <span class="string">&quot;networking&quot;</span>), <span class="comment">// For now, hide the sound tab because we don&#39;t have it working yet.
-                                          // (Self::Sound, &quot;sound&quot;)
-    </span>];
-}
-
 <span class="doccomment">/// Render the main menu UI
 </span><span class="kw">pub fn </span>main_menu_system(world: <span class="kw-2">&amp;mut </span>World) {
-    world.resource_scope(|world: <span class="kw-2">&amp;mut </span>World, <span class="kw-2">mut </span>egui_ctx: Mut&lt;EguiContext&gt;| {
-        egui::CentralPanel::default()
-            .frame(egui::Frame::none())
-            .show(egui_ctx.ctx_mut(), |ui| {
-                widget::&lt;MainMenu&gt;(world, ui, WidgetId::new(<span class="string">&quot;main-menu&quot;</span>), ());
-            });
-    });
+    <span class="kw">let </span><span class="kw-2">mut </span>egui_context = world
+        .query_filtered::&lt;<span class="kw-2">&amp;mut </span>EguiContext, With&lt;PrimaryWindow&gt;&gt;()
+        .single(world)
+        .clone();
+
+    egui::CentralPanel::default()
+        .frame(egui::Frame::none())
+        .show(egui_context.get_mut(), |ui| {
+            widget::&lt;MainMenu&gt;(world, ui, WidgetId::new(<span class="string">&quot;main-menu&quot;</span>), ());
+        });
 }
 
 <span class="attr">#[derive(SystemParam)]
@@ -579,12 +565,12 @@
         <span class="comment">// Render the menu based on the current menu selection
         </span><span class="kw">match </span><span class="kw-2">*</span>params.menu_page {
             MenuPage::Home =&gt; widget::&lt;HomeMenu&gt;(world, ui, id.with(<span class="string">&quot;home&quot;</span>), ()),
-            <span class="comment">// MenuPage::Matchmaking =&gt;
-            // {
-            //     #[cfg(not(target_arch = &quot;wasm32&quot;))]
-            //     widget::&lt;matchmaking::MatchmakingMenu&gt;(world, ui, id.with(&quot;matchmaking&quot;), ())
-            // }
-            </span>MenuPage::PlayerSelect =&gt; {
+            MenuPage::NetworkGame =&gt;
+            {
+                <span class="attr">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
+                </span>widget::&lt;network_game::MatchmakingMenu&gt;(world, ui, id.with(<span class="string">&quot;network-game&quot;</span>), ())
+            }
+            MenuPage::PlayerSelect =&gt; {
                 widget::&lt;player_select::PlayerSelectMenu&gt;(world, ui, id.with(<span class="string">&quot;player-select&quot;</span>), ())
             }
             MenuPage::MapSelect { is_waiting } =&gt; {
@@ -606,7 +592,7 @@
     modified_settings: ResMut&lt;<span class="lifetime">&#39;w</span>, ModifiedSettings&gt;,
     game: Res&lt;<span class="lifetime">&#39;w</span>, GameMeta&gt;,
     localization: Res&lt;<span class="lifetime">&#39;w</span>, Localization&gt;,
-    app_exit: EventWriter&lt;<span class="lifetime">&#39;w</span>, <span class="lifetime">&#39;s</span>, AppExit&gt;,
+    app_exit: EventWriter&lt;<span class="lifetime">&#39;w</span>, AppExit&gt;,
     storage: ResMut&lt;<span class="lifetime">&#39;w</span>, Storage&gt;,
 }
 
@@ -669,22 +655,20 @@
                         <span class="kw-2">*</span>params.menu_page = MenuPage::PlayerSelect;
                     }
 
-                    <span class="comment">// Online Game
+                    <span class="comment">// Network Game
                     </span><span class="attr">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
                     </span>{
                         ui.scope(|ui| {
-                            ui.set_enabled(<span class="bool-val">false</span>);
                             <span class="kw">let </span>online_game_button = BorderedButton::themed(
                                 <span class="kw-2">&amp;</span>ui_theme.button_styles.normal,
-                                <span class="kw-2">&amp;</span>params.localization.get(<span class="string">&quot;online-game&quot;</span>),
+                                <span class="kw-2">&amp;</span>params.localization.get(<span class="string">&quot;network-game&quot;</span>),
                             )
                             .min_size(min_button_size)
                             .show(ui);
 
                             <span class="kw">if </span>online_game_button.clicked() {
-                                <span class="macro">todo!</span>();
-                                <span class="comment">// *params.menu_page = MenuPage::Matchmaking;
-                            </span>}
+                                <span class="kw-2">*</span>params.menu_page = MenuPage::NetworkGame;
+                            }
                         });
                     }
 
@@ -700,13 +684,13 @@
                         {
                             params
                                 .commands
-                                .insert_resource(NextState(GameEditorState::Visible));
+                                .insert_resource(NextState(<span class="prelude-val">Some</span>(GameEditorState::Visible)));
                             params
                                 .commands
-                                .insert_resource(NextState(EngineState::InGame));
+                                .insert_resource(NextState(<span class="prelude-val">Some</span>(EngineState::InGame)));
                             params
                                 .commands
-                                .insert_resource(NextState(InGameState::Playing));
+                                .insert_resource(NextState(<span class="prelude-val">Some</span>(InGameState::Playing)));
                         }
                     });
 

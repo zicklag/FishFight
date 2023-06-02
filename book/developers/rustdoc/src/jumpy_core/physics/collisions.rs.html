@@ -888,106 +888,21 @@
 <a href="#887" id="887">887</a>
 <a href="#888" id="888">888</a>
 <a href="#889" id="889">889</a>
-<a href="#890" id="890">890</a>
-<a href="#891" id="891">891</a>
-<a href="#892" id="892">892</a>
-<a href="#893" id="893">893</a>
-<a href="#894" id="894">894</a>
-<a href="#895" id="895">895</a>
-<a href="#896" id="896">896</a>
-<a href="#897" id="897">897</a>
-<a href="#898" id="898">898</a>
-<a href="#899" id="899">899</a>
-<a href="#900" id="900">900</a>
-<a href="#901" id="901">901</a>
-<a href="#902" id="902">902</a>
-<a href="#903" id="903">903</a>
-<a href="#904" id="904">904</a>
-<a href="#905" id="905">905</a>
-<a href="#906" id="906">906</a>
-<a href="#907" id="907">907</a>
-<a href="#908" id="908">908</a>
-<a href="#909" id="909">909</a>
-<a href="#910" id="910">910</a>
-<a href="#911" id="911">911</a>
-<a href="#912" id="912">912</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Collision detection implementation.
 
-</span><span class="kw">use </span>::bevy::utils::{HashMap, HashSet};
+</span><span class="kw">use </span>std::hash::BuildHasherDefault;
+
 <span class="kw">use </span>bytemuck::Zeroable;
+
+<span class="kw">use </span>indexmap::IndexMap;
 
 <span class="kw">pub use </span>rapier2d::prelude <span class="kw">as </span>rapier;
 <span class="kw">pub use </span>shape::<span class="kw-2">*</span>;
 
 <span class="kw">mod </span>shape;
 
+<span class="kw">use </span><span class="kw">crate</span>::impl_system_param;
 <span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
-
-<span class="doccomment">/// Macro to &quot;derive&quot; ( not really a derive macro ) SystemParam for a struct.
-</span><span class="macro">macro_rules! </span>impl_system_param {
-    (
-        <span class="kw">pub struct </span><span class="macro-nonterminal">$t</span>:ident&lt;<span class="lifetime">&#39;a</span>&gt; {
-            $(
-                $( <span class="attr">#[<span class="macro-nonterminal">$attrs</span>:meta] </span>)*
-                <span class="macro-nonterminal">$f_name</span>:ident: <span class="macro-nonterminal">$f_ty</span>:ty
-            ),*
-            $(,)<span class="question-mark">?
-        </span>}
-    ) =&gt; {
-        <span class="kw">pub struct </span><span class="macro-nonterminal">$t</span>&lt;<span class="lifetime">&#39;a</span>&gt; {
-            $(
-                $( <span class="attr">#[<span class="macro-nonterminal">$attrs</span>] </span>)*
-                <span class="kw">pub </span><span class="macro-nonterminal">$f_name</span>: <span class="macro-nonterminal">$f_ty
-            </span>),*
-        }
-
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SystemParam <span class="kw">for </span><span class="macro-nonterminal">$t</span>&lt;<span class="lifetime">&#39;a</span>&gt; {
-            <span class="kw">type </span>State = (
-                $(
-                    &lt;<span class="macro-nonterminal">$f_ty </span><span class="kw">as </span>SystemParam&gt;::State
-                ),*
-            );
-            <span class="kw">type </span>Param&lt;<span class="lifetime">&#39;p</span>&gt; = <span class="macro-nonterminal">$t</span>&lt;<span class="lifetime">&#39;p</span>&gt;;
-
-            <span class="kw">fn </span>initialize(world: <span class="kw-2">&amp;mut </span>World) {
-                $(
-                    &lt;<span class="macro-nonterminal">$f_ty </span><span class="kw">as </span>SystemParam&gt;::initialize(world);
-                )*
-            }
-
-            <span class="kw">fn </span>get_state(world: <span class="kw-2">&amp;</span>World) -&gt; <span class="self">Self</span>::State {
-                (
-                    $(
-                        &lt;<span class="macro-nonterminal">$f_ty </span><span class="kw">as </span>SystemParam&gt;::get_state(world)
-                    ),*
-                )
-            }
-
-            <span class="kw">fn </span>borrow(state: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::State) -&gt; <span class="self">Self</span>::Param&lt;<span class="lifetime">&#39;_</span>&gt; {
-                <span class="kw">let </span>(
-                    $(
-                        <span class="macro-nonterminal">$f_name
-                    </span>),*
-                ) = state;
-                <span class="kw">let </span>(
-                    $(
-                        <span class="macro-nonterminal">$f_name
-                    </span>),*
-                ) = (
-                    $(
-                        &lt;<span class="macro-nonterminal">$f_ty </span><span class="kw">as </span>SystemParam&gt;::borrow(<span class="macro-nonterminal">$f_name</span>)
-                    ),*
-                );
-
-                <span class="self">Self</span>::Param {
-                    $(
-                        <span class="macro-nonterminal">$f_name
-                    </span>),*
-                }
-            }
-        }
-    };
-}
 
 <span class="doccomment">/// Resource containing the data structures needed for rapier collision detection.
 </span><span class="attr">#[derive(TypeUlid, Default)]
@@ -1022,18 +937,48 @@
 
 <span class="doccomment">/// A cache containing a map of entities, to the list of entities that each entity is currently
 /// intersecting with.
-</span><span class="attr">#[derive(Clone, Default)]
+</span><span class="attr">#[derive(Default)]
 </span><span class="kw">pub struct </span>CollisionCache {
     <span class="doccomment">/// The collisions in the cache.
-    </span><span class="kw">pub </span>collisions: Arc&lt;AtomicRefCell&lt;HashMap&lt;Entity, HashSet&lt;Entity&gt;&gt;&gt;&gt;,
+    </span><span class="kw">pub </span>collisions: Arc&lt;AtomicRefCell&lt;IndexMap&lt;Entity, Vec&lt;Entity&gt;, EntityBuildHasher&gt;&gt;&gt;,
+}
+
+<span class="doccomment">/// Pass-through hasher for entities to reduce hashing cost when using them as keys in a hash map.
+</span><span class="attr">#[derive(Default)]
+</span><span class="kw">pub struct </span>EntityHasher {
+    bytes_so_far: usize,
+    data: [u8; <span class="number">8</span>],
+}
+<span class="kw">type </span>EntityBuildHasher = BuildHasherDefault&lt;EntityHasher&gt;;
+
+<span class="kw">impl </span>std::hash::Hasher <span class="kw">for </span>EntityHasher {
+    <span class="kw">fn </span>finish(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+        u64::from_ne_bytes(<span class="self">self</span>.data)
+    }
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bytes: <span class="kw-2">&amp;</span>[u8]) {
+        <span class="kw">if </span><span class="self">self</span>.bytes_so_far + bytes.len() &lt;= <span class="number">8 </span>{
+            <span class="self">self</span>.data[<span class="self">self</span>.bytes_so_far..(<span class="self">self</span>.bytes_so_far + bytes.len())].copy_from_slice(bytes);
+            <span class="self">self</span>.bytes_so_far += bytes.len()
+        } <span class="kw">else </span>{
+            <span class="macro">panic!</span>(<span class="string">&quot;Too much data for `EntityHasher`. Will only accept 64 bits.&quot;</span>)
+        }
+    }
 }
 
 <span class="kw">impl </span>CollisionCache {
     <span class="doccomment">/// Get the set of entities that the given `entity` is intersecting.
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, entity: Entity) -&gt; AtomicRefMut&lt;<span class="lifetime">&#39;_</span>, HashSet&lt;Entity&gt;&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, entity: Entity) -&gt; AtomicRefMut&lt;<span class="lifetime">&#39;_</span>, Vec&lt;Entity&gt;&gt; {
         AtomicRefMut::map(<span class="self">self</span>.collisions.borrow_mut(), |x| {
             x.entry(entity).or_default()
         })
+    }
+}
+
+<span class="kw">impl </span>Clone <span class="kw">for </span>CollisionCache {
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            collisions: Arc::new(AtomicRefCell::new(<span class="self">self</span>.collisions.borrow().clone())),
+        }
     }
 }
 
@@ -1055,12 +1000,12 @@
                     .borrow_mut()
                     .entry(a_ent)
                     .or_default()
-                    .insert(b_ent);
+                    .push(b_ent);
                 <span class="self">self</span>.collisions
                     .borrow_mut()
                     .entry(b_ent)
                     .or_default()
-                    .insert(a_ent);
+                    .push(a_ent);
             }
             rapier::CollisionEvent::Stopped(a, b, <span class="kw">_</span>) =&gt; {
                 <span class="kw">let </span><span class="prelude-val">Some</span>(a_ent) = colliders.get(a).map(|x| RapierUserData::entity(x.user_data)) <span class="kw">else </span>{
@@ -1074,12 +1019,12 @@
                     .borrow_mut()
                     .entry(a_ent)
                     .or_default()
-                    .remove(<span class="kw-2">&amp;</span>b_ent);
+                    .retain(|e| e != <span class="kw-2">&amp;</span>b_ent);
                 <span class="self">self</span>.collisions
                     .borrow_mut()
                     .entry(b_ent)
                     .or_default()
-                    .remove(<span class="kw-2">&amp;</span>a_ent);
+                    .retain(|e| e != <span class="kw-2">&amp;</span>a_ent);
             }
         }
     }
@@ -1242,7 +1187,7 @@
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(colliding_with) = colliding_with {
                     <span class="kw">for </span>other_entity <span class="kw">in </span>colliding_with {
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(collisions) = collisions.get_mut(<span class="kw-2">&amp;</span>other_entity) {
-                            collisions.remove(<span class="kw-2">&amp;</span>entity);
+                            collisions.retain(|e| e != <span class="kw-2">&amp;</span>entity);
                         }
                     }
                 }
@@ -1483,7 +1428,7 @@
     /// platforms.
     </span><span class="kw">pub fn </span>descent(<span class="kw-2">&amp;mut </span><span class="self">self</span>, entity: Entity) {
         <span class="kw">if </span><span class="self">self</span>.actors.contains(entity) {
-            <span class="kw">let </span><span class="kw-2">mut </span>collider = <span class="self">self</span>.colliders.get_mut(entity).unwrap();
+            <span class="kw">let </span>collider = <span class="self">self</span>.colliders.get_mut(entity).unwrap();
             collider.descent = <span class="bool-val">true</span>;
         }
     }
@@ -1783,6 +1728,15 @@
     <span class="doccomment">/// Get the [`TileCollisionKind`] of the first tile detected colliding with the `shape` at the
     /// given `transform`.
     </span><span class="kw">pub fn </span>tile_collision(<span class="kw-2">&amp;</span><span class="self">self</span>, transform: Transform, shape: ColliderShape) -&gt; TileCollisionKind {
+        <span class="self">self</span>.tile_collision_filtered(transform, shape, |<span class="kw">_</span>| <span class="bool-val">true</span>)
+    }
+
+    <span class="kw">pub fn </span>tile_collision_filtered(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        transform: Transform,
+        shape: ColliderShape,
+        filter: <span class="kw">impl </span>Fn(Entity) -&gt; bool,
+    ) -&gt; TileCollisionKind {
         <span class="self">self</span>.ctx
             .query_pipeline
             .intersection_with_shape(
@@ -1796,7 +1750,7 @@
                 <span class="kw-2">&amp;*</span>shape.shared_shape(),
                 rapier::QueryFilter::new().predicate(<span class="kw-2">&amp;</span>|_handle, collider| {
                     <span class="kw">let </span>ent = RapierUserData::entity(collider.user_data);
-                    <span class="self">self</span>.tile_collision_kinds.contains(ent)
+                    <span class="self">self</span>.tile_collision_kinds.contains(ent) &amp;&amp; filter(ent)
                 }),
             )
             .map(|x| RapierUserData::entity(<span class="self">self</span>.ctx.collider_set.get(x).unwrap().user_data))

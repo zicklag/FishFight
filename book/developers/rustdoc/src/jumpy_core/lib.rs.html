@@ -79,7 +79,7 @@
         <span class="kw">crate</span>::{
             input::EditorInput,
             metadata::<span class="kw-2">*</span>,
-            session::{GameSession, GameSessionInfo, GameSessionPlayerInfo},
+            session::{CoreSession, CoreSessionInfo, GameSessionPlayerInfo},
             MAX_PLAYERS,
         },
         bones_lib::prelude <span class="kw">as </span>bones,
@@ -93,25 +93,25 @@
 <span class="kw">pub mod </span>debug;
 <span class="kw">pub mod </span>editor;
 <span class="kw">pub mod </span>elements;
+<span class="kw">pub mod </span>globals;
 <span class="kw">pub mod </span>input;
 <span class="kw">pub mod </span>item;
 <span class="kw">pub mod </span>lifetime;
 <span class="kw">pub mod </span>map;
-<span class="kw">pub mod </span>math;
 <span class="kw">pub mod </span>metadata;
 <span class="kw">pub mod </span>physics;
 <span class="kw">pub mod </span>player;
 <span class="kw">pub mod </span>random;
 <span class="kw">pub mod </span>session;
-<span class="kw">pub mod </span>testing;
+<span class="kw">pub mod </span>utils;
 
 <span class="doccomment">/// The target fixed frames-per-second that the game sumulation runs at.
 </span><span class="kw">pub const </span>FPS: f32 = <span class="number">60.0</span>;
 <span class="kw">pub const </span>MAX_PLAYERS: usize = <span class="number">4</span>;
 
 <span class="doccomment">/// Install game modules into the session.
-</span><span class="kw">pub fn </span>install_modules(session: <span class="kw-2">&amp;mut </span>session::GameSession) {
-    testing::install(session);
+</span><span class="kw">pub fn </span>install_modules(session: <span class="kw-2">&amp;mut </span>session::CoreSession) {
+    bones_lib::install(<span class="kw-2">&amp;mut </span>session.stages);
     physics::install(session);
     input::install(session);
     map::install(session);

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":[["NETWORK_FRAME_RATE_FACTOR",""]],"enum":[["LanMatchmakerRequest",""],["LanMatchmakerResponse",""]],"fn":[["lan_matchmaker","Implementation of the matchmaker task"]],"static":[["LAN_MATCHMAKER","Channel used to do matchmaking over LAN."]],"struct":[["LanMatchmaker",""],["LanSocket",""]]};
