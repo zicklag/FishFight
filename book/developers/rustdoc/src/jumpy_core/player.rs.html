@@ -1,4 +1,90 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/player.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>player.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-6827029ac823cab7.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-ebce58d0a40c3431.css"><link rel="stylesheet" disabled href="../../static.files/dark-f23faae4a2daf9a6.css"><link rel="stylesheet" disabled href="../../static.files/ayu-8af5e100b21cd173.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../static.files/source-script-5cf2e01a42cc9858.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-c55e1eb52e1886b4.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../jumpy_core/index.html">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/player.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>player.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-6827029ac823cab7.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-ebce58d0a40c3431.css"><link rel="stylesheet" disabled href="../../static.files/dark-f23faae4a2daf9a6.css"><link rel="stylesheet" disabled href="../../static.files/ayu-8af5e100b21cd173.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../static.files/source-script-5cf2e01a42cc9858.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-c55e1eb52e1886b4.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"><script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
+<script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.2.2/dist/mermaid.esm.min.mjs"
+    mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'loose',
+        theme: 'dark',
+        themeVariables: {
+            fontSize: '16px',
+            lineColor: '#F8B229',
+            clusterBkg: '#0000',
+            edgeLabelBackground: '#1A1A1A'
+        }
+    });
+    mermaid.run({
+        querySelector: '.mermaid',
+        postRenderCallback: id => {
+            let el = document.getElementById(id);
+            const pz = panzoom(el, {
+                smoothScroll: false,
+                zoomDoubleClickSpeed: 1,
+                beforeWheel: function (e) {
+                    // allow wheel-zoom only if ctrl is down. Otherwise - ignore
+                    var shouldIgnore = !e.ctrlKey;
+                    return shouldIgnore;
+                }
+            })
+
+            const plusDiv = document.createElement('div');
+            plusDiv.style = "width: 25px; height: 25px; position: absolute; right: 0.8em; bottom: 0.8em; border: 2px solid #BBB; text-align: center; padding: auto; font-size: 18px; background-color: #222; cursor: pointer"
+            plusDiv.innerText = "+"
+            plusDiv.onclick = () => {
+                pz.smoothZoom(0, 0, 1.2)
+            }
+            el.parentNode.appendChild(plusDiv);
+
+            const minusDiv = document.createElement('div');
+            minusDiv.style = "width: 25px; height: 25px; position: absolute; right: 2.4em; bottom: 0.8em; border: 2px solid #BBB; text-align: center; padding: auto; font-size: 18px; background-color: #222; cursor: pointer"
+            minusDiv.innerText = "-"
+            minusDiv.onclick = () => {
+                pz.smoothZoom(0, 0, 0.8)
+            }
+            el.parentNode.appendChild(minusDiv);
+        }
+    })
+
+    // Callback for use in mermaid diagrams that will open a relative doc link when clicking.
+    //
+    // Example doc link for `arg` would be: jumpy/session/struct.SessionManager.html
+    window.docLink = (arg) => {
+        let pathElems = new URL(window.location.href).pathname.split('/').filter(x => x != '');
+        for (let i = pathElems.length - 1; i > -1; i--) {
+            if (pathElems[i] != 'jumpy' && pathElems[i] != 'jumpy_core') {
+                pathElems = pathElems.slice(0, i - 1);
+                break;
+            }
+        }
+        window.location.href = '/' + pathElems.join('/') + '/' + arg;
+    }
+</script>
+<style>
+    .mermaid {
+        overflow: hidden !important;
+        border: 1px solid #BBB;
+        border-radius: 1em;
+        cursor: move
+    }
+
+    .dotted rect {
+        stroke-dasharray: 5;
+    }
+
+    .code .nodeLabel {
+        color: #2dbfb8 !important;
+    }
+
+    .code rect {
+        transition: 0.2s;
+        stroke: #2dbfb8 !important;
+    }
+
+    .code:hover rect {
+        transform: scale(1.05)
+    }
+</style>
+
+</head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../jumpy_core/index.html">
                         <img src="https://avatars.githubusercontent.com/u/87333478?s=200&amp;v=4" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -755,7 +841,56 @@
 <a href="#754" id="754">754</a>
 <a href="#755" id="755">755</a>
 <a href="#756" id="756">756</a>
-</pre><pre class="rust"><code><span class="kw">use </span>std::collections::VecDeque;
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Player controller, states, and animation implementation.
+
+</span><span class="kw">use </span>std::collections::VecDeque;
 
 <span class="kw">use crate</span>::{
     item::ItemGrabbed,
@@ -993,11 +1128,28 @@
     }
 }
 
-<span class="attr">#[derive(Default, Clone, Debug, TypeUlid)]
+<span class="attr">#[derive(Clone, Debug, TypeUlid)]
 #[ulid = <span class="string">&quot;01GQWND0P969BCZF5JET9MY944&quot;</span>]
 </span><span class="kw">pub struct </span>AiPlayer {
-    movement_buffer: <span class="prelude-ty">Option</span>&lt;VecDeque&lt;PlayerControl&gt;&gt;,
-    target_player: <span class="prelude-ty">Option</span>&lt;Entity&gt;,
+    <span class="doccomment">/// Tick timer that is used for AI pausing logic.
+    </span>tick: Timer,
+    <span class="doccomment">/// Indicates the player is taking pause for the given number of ticks.
+    </span>pausing: u32,
+    <span class="doccomment">/// Buffers planned AI movements
+    </span>movement_buffer: <span class="prelude-ty">Option</span>&lt;VecDeque&lt;PlayerControl&gt;&gt;,
+    <span class="doccomment">/// The player that the AI is targeting.
+    </span>target_player: <span class="prelude-ty">Option</span>&lt;Entity&gt;,
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>AiPlayer {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            tick: Timer::from_seconds(<span class="number">0.5</span>, TimerMode::Repeating),
+            pausing: <span class="number">0</span>,
+            movement_buffer: Default::default(),
+            target_player: Default::default(),
+        }
+    }
 }
 
 <span class="attr">#[derive(Debug, TypeUlid, Clone)]
@@ -1046,12 +1198,37 @@
     bodies: Comp&lt;KinematicBody&gt;,
     debug_settings: Res&lt;DebugSettings&gt;,
     rng: Res&lt;GlobalRng&gt;,
+    time: Res&lt;Time&gt;,
 ) {
-    <span class="kw">const </span>SWORD_SWING_DIST: f32 = <span class="number">50.0</span>;
+    <span class="kw">const </span>SWORD_SWING_DIST: f32 = <span class="number">10.0</span>;
+    <span class="kw">const </span>AI_SPEED_MULTIPLIER: f32 = <span class="number">0.65</span>;
 
     <span class="kw">for </span>(ai_ent, (player_idx, transform, ai_player)) <span class="kw">in
         </span>entities.iter_with((<span class="kw-2">&amp;</span>player_indexes, <span class="kw-2">&amp;</span>transforms, <span class="kw-2">&amp;mut </span>ai_players))
     {
+        <span class="comment">// Tick the AI timer
+        </span>ai_player.tick.tick(time.delta());
+
+        <span class="comment">// If a tick has elapsed
+        </span><span class="kw">if </span>ai_player.tick.just_finished() {
+            <span class="comment">// If the player isn&#39;t pausing, then there&#39;s a 40% chance
+            </span><span class="kw">if </span>ai_player.pausing == <span class="number">0 </span>&amp;&amp; rng.chance(<span class="number">0.4</span>) {
+                <span class="comment">// That we will pause for a random number of ticks between 0 and 2
+                </span>ai_player.pausing = (rng.f32_normalized() * <span class="number">2.0</span>).round() <span class="kw">as </span>u32
+            }
+
+            <span class="comment">// If the player is pausing
+            </span><span class="kw">if </span>ai_player.pausing &gt; <span class="number">0 </span>{
+                <span class="comment">// Subtract a tick from how long they should pause.
+                </span>ai_player.pausing -= <span class="number">1</span>;
+            }
+        }
+
+        <span class="comment">// If the player is pausing, don&#39;t have the AI move this frame.
+        </span><span class="kw">if </span>ai_player.pausing &gt; <span class="number">0 </span>{
+            <span class="kw">continue</span>;
+        }
+
         <span class="kw">let </span>target_transform = <span class="kw">match </span>ai_player.target_player {
             <span class="prelude-val">Some</span>(target_player) <span class="kw">if </span>transforms.contains(target_player) =&gt; {
                 transforms.get(target_player).unwrap()
@@ -1117,6 +1294,9 @@
                 <span class="kw">let </span>edge = nav_graph.edge_weight(current_node, next_node).unwrap();
                 <span class="kw">let </span><span class="kw-2">mut </span>movement_buffer = edge.inputs.clone();
                 <span class="kw">let </span><span class="kw-2">mut </span>first_movement = movement_buffer.pop_front().unwrap();
+
+                <span class="comment">// Slow down the AI movement according to the fixed multiplier
+                </span>first_movement.move_direction <span class="kw-2">*</span>= vec2(AI_SPEED_MULTIPLIER, <span class="number">1.0</span>);
 
                 <span class="comment">// This is a hack to prevent us from getting stuck when we think we should be falling
                 // straight down and we actually need to move off of the block we&#39;re half-standing on.

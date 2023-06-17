@@ -1,4 +1,90 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/editor.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>editor.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-6827029ac823cab7.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-ebce58d0a40c3431.css"><link rel="stylesheet" disabled href="../../static.files/dark-f23faae4a2daf9a6.css"><link rel="stylesheet" disabled href="../../static.files/ayu-8af5e100b21cd173.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../static.files/source-script-5cf2e01a42cc9858.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-c55e1eb52e1886b4.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../jumpy_core/index.html">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/editor.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>editor.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-6827029ac823cab7.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-ebce58d0a40c3431.css"><link rel="stylesheet" disabled href="../../static.files/dark-f23faae4a2daf9a6.css"><link rel="stylesheet" disabled href="../../static.files/ayu-8af5e100b21cd173.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../static.files/source-script-5cf2e01a42cc9858.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-c55e1eb52e1886b4.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"><script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
+<script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.2.2/dist/mermaid.esm.min.mjs"
+    mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'loose',
+        theme: 'dark',
+        themeVariables: {
+            fontSize: '16px',
+            lineColor: '#F8B229',
+            clusterBkg: '#0000',
+            edgeLabelBackground: '#1A1A1A'
+        }
+    });
+    mermaid.run({
+        querySelector: '.mermaid',
+        postRenderCallback: id => {
+            let el = document.getElementById(id);
+            const pz = panzoom(el, {
+                smoothScroll: false,
+                zoomDoubleClickSpeed: 1,
+                beforeWheel: function (e) {
+                    // allow wheel-zoom only if ctrl is down. Otherwise - ignore
+                    var shouldIgnore = !e.ctrlKey;
+                    return shouldIgnore;
+                }
+            })
+
+            const plusDiv = document.createElement('div');
+            plusDiv.style = "width: 25px; height: 25px; position: absolute; right: 0.8em; bottom: 0.8em; border: 2px solid #BBB; text-align: center; padding: auto; font-size: 18px; background-color: #222; cursor: pointer"
+            plusDiv.innerText = "+"
+            plusDiv.onclick = () => {
+                pz.smoothZoom(0, 0, 1.2)
+            }
+            el.parentNode.appendChild(plusDiv);
+
+            const minusDiv = document.createElement('div');
+            minusDiv.style = "width: 25px; height: 25px; position: absolute; right: 2.4em; bottom: 0.8em; border: 2px solid #BBB; text-align: center; padding: auto; font-size: 18px; background-color: #222; cursor: pointer"
+            minusDiv.innerText = "-"
+            minusDiv.onclick = () => {
+                pz.smoothZoom(0, 0, 0.8)
+            }
+            el.parentNode.appendChild(minusDiv);
+        }
+    })
+
+    // Callback for use in mermaid diagrams that will open a relative doc link when clicking.
+    //
+    // Example doc link for `arg` would be: jumpy/session/struct.SessionManager.html
+    window.docLink = (arg) => {
+        let pathElems = new URL(window.location.href).pathname.split('/').filter(x => x != '');
+        for (let i = pathElems.length - 1; i > -1; i--) {
+            if (pathElems[i] != 'jumpy' && pathElems[i] != 'jumpy_core') {
+                pathElems = pathElems.slice(0, i - 1);
+                break;
+            }
+        }
+        window.location.href = '/' + pathElems.join('/') + '/' + arg;
+    }
+</script>
+<style>
+    .mermaid {
+        overflow: hidden !important;
+        border: 1px solid #BBB;
+        border-radius: 1em;
+        cursor: move
+    }
+
+    .dotted rect {
+        stroke-dasharray: 5;
+    }
+
+    .code .nodeLabel {
+        color: #2dbfb8 !important;
+    }
+
+    .code rect {
+        transition: 0.2s;
+        stroke: #2dbfb8 !important;
+    }
+
+    .code:hover rect {
+        transform: scale(1.05)
+    }
+</style>
+
+</head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../jumpy_core/index.html">
                         <img src="https://avatars.githubusercontent.com/u/87333478?s=200&amp;v=4" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -288,7 +374,68 @@
 <a href="#287" id="287">287</a>
 <a href="#288" id="288">288</a>
 <a href="#289" id="289">289</a>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::impl_system_param;
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Map editing implementation.
+//!
+//! Allows you to edit the game map while the game is running.
+
+</span><span class="kw">use </span><span class="kw">crate</span>::impl_system_param;
+<span class="kw">use </span><span class="kw">crate</span>::map_constructor::shiftnanigans::ShiftnanigansMapConstructor;
+<span class="kw">use </span><span class="kw">crate</span>::map_constructor::MapConstructor;
 <span class="kw">use crate</span>::{map::z_depth_for_map_layer, prelude::<span class="kw-2">*</span>};
 
 <span class="kw">pub fn </span>install(session: <span class="kw-2">&amp;mut </span>CoreSession) {
@@ -308,20 +455,22 @@
         tile_layers: CompMut&lt;<span class="lifetime">&#39;a</span>, TileLayer&gt;,
         tiles: CompMut&lt;<span class="lifetime">&#39;a</span>, Tile&gt;,
         tile_collisions: CompMut&lt;<span class="lifetime">&#39;a</span>, TileCollisionKind&gt;,
+        map: Res&lt;<span class="lifetime">&#39;a</span>, LoadedMap&gt;,
         element_kill_callbacks: Comp&lt;<span class="lifetime">&#39;a</span>, ElementKillCallback&gt;,
         spawner_manager: SpawnerManager&lt;<span class="lifetime">&#39;a</span>&gt;,
     }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MapManager&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>create_element(
+    <span class="kw">pub fn </span>create_element(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         element_meta_handle: <span class="kw-2">&amp;</span>Handle&lt;ElementMeta&gt;,
         translation: <span class="kw-2">&amp;</span>Vec2,
         layer_index: usize,
     ) {
         <span class="kw">let </span>entity = <span class="self">self</span>.entities.create();
-        <span class="self">self</span>.element_handles
+        <span class="comment">// TODO remove element handles as the underlying elements are removed
+        </span><span class="self">self</span>.element_handles
             .insert(entity, ElementHandle(element_meta_handle.clone()));
         <span class="kw">let </span>z_depth = z_depth_for_map_layer(layer_index);
         <span class="self">self</span>.transforms.insert(
@@ -335,7 +484,7 @@
             },
         );
     }
-    <span class="kw">fn </span>create_layer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: String) {
+    <span class="kw">pub fn </span>create_layer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: String) {
         <span class="kw">let </span>entity = <span class="self">self</span>.entities.create();
         <span class="kw">let </span>layer_index = <span class="self">self</span>.spawned_map_meta.layer_names.len();
         <span class="self">self</span>.spawned_map_meta.layer_names = <span class="self">self
@@ -365,7 +514,7 @@
             Transform::from_translation(Vec3::new(<span class="number">0.0</span>, <span class="number">0.0</span>, z_depth_for_map_layer(layer_index))),
         );
     }
-    <span class="kw">fn </span>delete_layer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, layer_index: usize) {
+    <span class="kw">pub fn </span>delete_layer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, layer_index: usize) {
         <span class="kw">let </span>layer_count = <span class="self">self</span>.spawned_map_meta.layer_names.len();
         <span class="kw">let </span>layers_to_decrement = layer_count - layer_index;
         <span class="self">self</span>.spawned_map_meta.layer_names = <span class="self">self
@@ -399,7 +548,7 @@
             <span class="self">self</span>.entities.kill(ent);
         });
     }
-    <span class="kw">fn </span>rename_layer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, layer_index: usize, name: <span class="kw-2">&amp;</span>str) {
+    <span class="kw">pub fn </span>rename_layer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, layer_index: usize, name: <span class="kw-2">&amp;</span>str) {
         <span class="self">self</span>.spawned_map_meta.layer_names = <span class="self">self
             </span>.spawned_map_meta
             .layer_names
@@ -410,12 +559,12 @@
             .map(|(i, n)| <span class="kw">if </span>i == layer_index { name.to_owned() } <span class="kw">else </span>{ n })
             .collect();
     }
-    <span class="kw">fn </span>move_element(<span class="kw-2">&amp;mut </span><span class="self">self</span>, entity: Entity, position: <span class="kw-2">&amp;</span>Vec2) {
+    <span class="kw">pub fn </span>move_element(<span class="kw-2">&amp;mut </span><span class="self">self</span>, entity: Entity, position: <span class="kw-2">&amp;</span>Vec2) {
         <span class="kw">let </span>transform = <span class="self">self</span>.transforms.get_mut(entity).unwrap();
         transform.translation.x = position.x;
         transform.translation.y = position.y;
     }
-    <span class="kw">fn </span>delete_element(<span class="kw-2">&amp;mut </span><span class="self">self</span>, entity: Entity) {
+    <span class="kw">pub fn </span>delete_element(<span class="kw-2">&amp;mut </span><span class="self">self</span>, entity: Entity) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(element_kill_callback) = <span class="self">self</span>.element_kill_callbacks.get(entity) {
             <span class="kw">let </span>system = element_kill_callback.system.clone();
             <span class="self">self</span>.commands
@@ -432,7 +581,7 @@
             <span class="self">self</span>.entities.kill(entity);
         }
     }
-    <span class="kw">fn </span>set_layer_tilemap(<span class="kw-2">&amp;mut </span><span class="self">self</span>, layer_index: usize, tilemap: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Handle&lt;Atlas&gt;&gt;) {
+    <span class="kw">pub fn </span>set_layer_tilemap(<span class="kw-2">&amp;mut </span><span class="self">self</span>, layer_index: usize, tilemap: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Handle&lt;Atlas&gt;&gt;) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, (tile_layer, <span class="kw">_</span>))) = <span class="self">self
             </span>.entities
             .iter_with((<span class="kw-2">&amp;mut </span><span class="self">self</span>.tile_layers, <span class="kw-2">&amp;</span><span class="self">self</span>.spawned_map_layer_metas))
@@ -445,7 +594,7 @@
             }
         };
     }
-    <span class="kw">fn </span>set_tile(
+    <span class="kw">pub fn </span>set_tile(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         layer_index: usize,
         position: UVec2,
@@ -500,7 +649,7 @@
                 });
         };
     }
-    <span class="kw">fn </span>swap_layer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, layer_index: usize, is_downward: bool) {
+    <span class="kw">pub fn </span>swap_layer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, layer_index: usize, is_downward: bool) {
         <span class="kw">let </span>origin_layer_index = layer_index;
         <span class="kw">let </span>other_layer_index = <span class="kw">if </span>is_downward {
             origin_layer_index + <span class="number">1
@@ -524,8 +673,42 @@
             }
         }
     }
-    <span class="kw">fn </span>rename_map(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: String) {
+    <span class="kw">pub fn </span>rename_map(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: String) {
         <span class="self">self</span>.spawned_map_meta.name = name.into();
+    }
+    <span class="kw">pub fn </span>get_size(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; UVec2 {
+        <span class="self">self</span>.spawned_map_meta.grid_size
+    }
+    <span class="kw">pub fn </span>get_layers_total(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.spawned_map_meta.layer_names.len()
+    }
+    <span class="kw">pub fn </span>clear_tiles(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">let </span>empty_tile: <span class="prelude-ty">Option</span>&lt;usize&gt; = Option::None;
+        <span class="kw">for </span>y <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.spawned_map_meta.grid_size.y {
+            <span class="kw">for </span>x <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.spawned_map_meta.grid_size.x {
+                <span class="kw">let </span>position = UVec2 { x, y };
+                <span class="kw">for </span>layer_index <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.spawned_map_meta.layer_names.len() {
+                    <span class="self">self</span>.set_tile(
+                        layer_index,
+                        position,
+                        <span class="kw-2">&amp;</span>empty_tile,
+                        <span class="kw">crate</span>::physics::TileCollisionKind::Empty,
+                    );
+                }
+            }
+        }
+    }
+    <span class="kw">pub fn </span>clear_elements(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">let </span><span class="kw-2">mut </span>to_kill: Vec&lt;Entity&gt; = Vec::new();
+        <span class="self">self</span>.entities
+            .iter_with(<span class="kw-2">&amp;mut </span><span class="self">self</span>.element_handles)
+            .for_each(|(entity, <span class="kw">_</span>)| {
+                to_kill.push(entity);
+            });
+
+        to_kill.into_iter().for_each(|entity| {
+            <span class="self">self</span>.delete_element(entity);
+        });
     }
 }
 
@@ -572,6 +755,19 @@
                 }
                 EditorInput::RenameMap { name } =&gt; {
                     map_manager.rename_map(name.clone());
+                }
+                EditorInput::RandomizeTiles {
+                    tile_layers,
+                    element_layers,
+                    tile_size,
+                } =&gt; {
+                    <span class="kw">let </span>map_constructor = ShiftnanigansMapConstructor::new(
+                        map_manager.get_size(),
+                        <span class="kw-2">*</span>tile_size,
+                        tile_layers,
+                        element_layers,
+                    );
+                    map_constructor.construct_map(<span class="kw-2">&amp;mut </span>map_manager);
                 }
             }
         }

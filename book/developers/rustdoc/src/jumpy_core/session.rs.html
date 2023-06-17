@@ -1,4 +1,90 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/session.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>session.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-6827029ac823cab7.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-ebce58d0a40c3431.css"><link rel="stylesheet" disabled href="../../static.files/dark-f23faae4a2daf9a6.css"><link rel="stylesheet" disabled href="../../static.files/ayu-8af5e100b21cd173.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../static.files/source-script-5cf2e01a42cc9858.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-c55e1eb52e1886b4.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../jumpy_core/index.html">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/session.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>session.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-6827029ac823cab7.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-ebce58d0a40c3431.css"><link rel="stylesheet" disabled href="../../static.files/dark-f23faae4a2daf9a6.css"><link rel="stylesheet" disabled href="../../static.files/ayu-8af5e100b21cd173.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../static.files/source-script-5cf2e01a42cc9858.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-c55e1eb52e1886b4.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"><script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
+<script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.2.2/dist/mermaid.esm.min.mjs"
+    mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'loose',
+        theme: 'dark',
+        themeVariables: {
+            fontSize: '16px',
+            lineColor: '#F8B229',
+            clusterBkg: '#0000',
+            edgeLabelBackground: '#1A1A1A'
+        }
+    });
+    mermaid.run({
+        querySelector: '.mermaid',
+        postRenderCallback: id => {
+            let el = document.getElementById(id);
+            const pz = panzoom(el, {
+                smoothScroll: false,
+                zoomDoubleClickSpeed: 1,
+                beforeWheel: function (e) {
+                    // allow wheel-zoom only if ctrl is down. Otherwise - ignore
+                    var shouldIgnore = !e.ctrlKey;
+                    return shouldIgnore;
+                }
+            })
+
+            const plusDiv = document.createElement('div');
+            plusDiv.style = "width: 25px; height: 25px; position: absolute; right: 0.8em; bottom: 0.8em; border: 2px solid #BBB; text-align: center; padding: auto; font-size: 18px; background-color: #222; cursor: pointer"
+            plusDiv.innerText = "+"
+            plusDiv.onclick = () => {
+                pz.smoothZoom(0, 0, 1.2)
+            }
+            el.parentNode.appendChild(plusDiv);
+
+            const minusDiv = document.createElement('div');
+            minusDiv.style = "width: 25px; height: 25px; position: absolute; right: 2.4em; bottom: 0.8em; border: 2px solid #BBB; text-align: center; padding: auto; font-size: 18px; background-color: #222; cursor: pointer"
+            minusDiv.innerText = "-"
+            minusDiv.onclick = () => {
+                pz.smoothZoom(0, 0, 0.8)
+            }
+            el.parentNode.appendChild(minusDiv);
+        }
+    })
+
+    // Callback for use in mermaid diagrams that will open a relative doc link when clicking.
+    //
+    // Example doc link for `arg` would be: jumpy/session/struct.SessionManager.html
+    window.docLink = (arg) => {
+        let pathElems = new URL(window.location.href).pathname.split('/').filter(x => x != '');
+        for (let i = pathElems.length - 1; i > -1; i--) {
+            if (pathElems[i] != 'jumpy' && pathElems[i] != 'jumpy_core') {
+                pathElems = pathElems.slice(0, i - 1);
+                break;
+            }
+        }
+        window.location.href = '/' + pathElems.join('/') + '/' + arg;
+    }
+</script>
+<style>
+    .mermaid {
+        overflow: hidden !important;
+        border: 1px solid #BBB;
+        border-radius: 1em;
+        cursor: move
+    }
+
+    .dotted rect {
+        stroke-dasharray: 5;
+    }
+
+    .code .nodeLabel {
+        color: #2dbfb8 !important;
+    }
+
+    .code rect {
+        transition: 0.2s;
+        stroke: #2dbfb8 !important;
+    }
+
+    .code:hover rect {
+        transform: scale(1.05)
+    }
+</style>
+
+</head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../jumpy_core/index.html">
                         <img src="https://avatars.githubusercontent.com/u/87333478?s=200&amp;v=4" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -246,21 +332,116 @@
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+</pre><pre class="rust"><code><span class="doccomment">//! [`CoreSession`] implementation: the entrypoint for using `jumpy_core`.
 
-<span class="doccomment">/// The implementation of a Jumpy game session.
+</span><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
+
+<span class="doccomment">/// Implementation of the Jumpy match session.
 ///
-/// This session allows you to do things like:
+/// This encapsulates all of the game match logic, and is used to:
 ///
-/// - Provide input
-/// - Snapshot/Restore game state
-/// - Access the session&#39;s ECS [`World`]
+/// - Provide input to the game.
+/// - Snapshot/Restore the game state.
+/// - Access the session&#39;s ECS [`World`] ( for instance, to render the game ).
+///
+/// All of this is done **without** rendering anything. The game systems logic will create
+/// [`Sprite`] entities, etc. that may be read directly out of the [`world`][Self::world] field in
+/// in order to render the game.
+///
+/// The `bones_bevy_renderer` crate can be used to render the contained [`World`] in Bevy, as it is
+/// used in the `jumpy` crate and in the [`core_usage`
+/// example](https://github.com/fishfolk/jumpy/blob/main/examples/core_usage.rs).
+///
+/// ## Game Systems
+///
+/// When instantiated with [`CoreSession::new()`], the session will have all of the core game
+/// systems installed into it&#39;s [`stages`][Self::stages]. This is done by calling
+/// [`install_modules()`][crate::install_modules].
+///
+/// If you are contributing and want to add more systems to the game, you can do so by adding your
+/// module to the [`install_modules()`][crate::install_modules] function body, following the pattern
+/// of the existing modules already there.
+///
+/// ## `CoreMeta`
+///
+/// An important struct required to create a new session is the [`CoreMeta`] struct in
+/// [`CoreSessionInfo`].
+///
+/// [`CoreMeta`] contains the session&#39;s entire metadata tree, including items, maps, and player
+/// skins.
+///
+/// In `jumpy` this is loaded as a Bevy asset from YAMl files.
+///
+/// See the [`metadata`][crate::metadata] module for more details.
 </span><span class="kw">pub struct </span>CoreSession {
-    <span class="kw">pub </span>world: World,
-    <span class="kw">pub </span>stages: SystemStages,
-    <span class="kw">pub </span>scratch_world: <span class="prelude-ty">Option</span>&lt;::bevy::ecs::world::World&gt;,
-    <span class="kw">pub </span>info: CoreSessionInfo,
-    <span class="kw">pub </span>time_step: f32,
+    <span class="doccomment">/// The ECS world for the session. Contains the whole gameplay state.
+    </span><span class="kw">pub </span>world: World,
+    <span class="doccomment">/// Contains the game systems that modify the ECS `world` every frame.
+    </span><span class="kw">pub </span>stages: SystemStages,
+    <span class="doccomment">/// The information necessary to initialize the session.
+    </span><span class="kw">pub </span>info: CoreSessionInfo,
+    <span class="doccomment">/// The number of seconds in simulation time between frames.
+    ///
+    /// **Important Note:** This sets how much time advances in the game world whenever you call
+    /// [`advance()`][Self::advance], irrespective of how much real-life time actually elapsed
+    /// between your calls to `advance()`.
+    ///
+    /// This means that you must manually provide some sort of fixed-update logic in order to make
+    /// sure that `advance()` is called as many times per second as you desire.
+    </span><span class="kw">pub </span>time_step: f32,
+    <span class="doccomment">/// Implementation detail.
+    ///
+    /// Used during [`advance()`][Self::advance] to borrow the bevy world.
+    </span><span class="kw">pub </span>scratch_world: <span class="prelude-ty">Option</span>&lt;::bevy::ecs::world::World&gt;,
 }
 
 <span class="doccomment">/// Information needed to start a game session.
@@ -274,14 +455,17 @@
     </span><span class="kw">pub </span>player_info: [<span class="prelude-ty">Option</span>&lt;GameSessionPlayerInfo&gt;; MAX_PLAYERS],
 }
 
-<span class="attr">#[derive(Debug, Clone)]
+<span class="doccomment">/// Info for a player in the [`CoreSessionInfo`] struct.
+</span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>GameSessionPlayerInfo {
-    <span class="kw">pub </span>handle: Handle&lt;PlayerMeta&gt;,
-    <span class="kw">pub </span>is_ai: bool,
+    <span class="doccomment">/// The asset handle for the player skin.
+    </span><span class="kw">pub </span>handle: Handle&lt;PlayerMeta&gt;,
+    <span class="doccomment">/// Whether or not the player is an AI player.
+    </span><span class="kw">pub </span>is_ai: bool,
 }
 
 <span class="kw">impl </span>CoreSession {
-    <span class="doccomment">/// Create a new game session
+    <span class="doccomment">/// Create a new [`CoreSession`].
     </span><span class="kw">pub fn </span>new(<span class="kw-2">mut </span>info: CoreSessionInfo) -&gt; <span class="self">Self </span>{
         <span class="comment">// Create session
         </span><span class="kw">let </span><span class="kw-2">mut </span>session = <span class="self">Self </span>{
